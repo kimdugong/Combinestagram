@@ -46,12 +46,12 @@ class MainViewController: UIViewController {
             guard let preview = self?.imagePreview else { return }
             preview.image = photos.collage(size: preview.frame.size)
         })
-        .disposed(by: bag)
+            .disposed(by: bag)
         
         images.asObservable().subscribe(onNext: { [weak self] photos in
             self?.updateUI(photos: photos)
         })
-        .disposed(by: bag)
+            .disposed(by: bag)
     }
     
     @IBAction func actionClear() {
@@ -63,7 +63,15 @@ class MainViewController: UIViewController {
     }
     
     @IBAction func actionAdd() {
-        images.value.append(UIImage(named: "IMG_1907.jpg")!)
+        //        images.value.append(UIImage(named: "IMG_1907.jpg")!)
+        let photosViewController = storyboard!.instantiateViewController(withIdentifier: "PhotosViewController") as! PhotosViewController
+        photosViewController.seletedPhotos.subscribe(onNext: { [weak self] newImage in
+                guard let images = self?.images else { return }
+                images.value.append(newImage)
+            }, onDisposed: {
+                print("completed photo selection")
+            }).disposed(by: bag)
+        navigationController!.pushViewController(photosViewController, animated: true)
     }
     
     func showMessage(_ title: String, description: String? = nil) {
